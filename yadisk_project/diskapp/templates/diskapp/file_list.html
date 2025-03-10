@@ -1,0 +1,55 @@
+<!-- diskapp/templates/diskapp/file_list.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Файлы Яндекс.Диска</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Список файлов и папок</h1>
+
+    <!-- Форма фильтрации -->
+    <form method="get" class="form-inline mb-3">
+        <label for="filter" class="mr-2">Фильтр по типу:</label>
+        <select name="filter" id="filter" class="form-control mr-2">
+            <option value="">Все</option>
+            <option value="images" {% if request.GET.filter == "images" %}selected{% endif %}>Изображения</option>
+            <option value="documents" {% if request.GET.filter == "documents" %}selected{% endif %}>Документы</option>
+        </select>
+        <button type="submit" class="btn btn-secondary">Применить</button>
+    </form>
+
+    <form method="post" action="{% url 'diskapp:download_files' %}">
+        {% csrf_token %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Выбрать</th>
+                    <th>Имя файла</th>
+                    <th>Тип</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <!-- Передаём путь файла для скачивания -->
+                        <input type="checkbox" name="file_paths" value="{{ item.path }}">
+                    </td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.type }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">Файлы не найдены.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-success">Скачать выбранные файлы</button>
+    </form>
+</div>
+</body>
+</html>
