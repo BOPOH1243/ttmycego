@@ -10,24 +10,33 @@
 <div class="container mt-5">
     <h1>Список файлов и папок</h1>
 
+    <!-- Кнопка перехода в родительскую директорию -->
+    {% if current_path %}
+    <div class="mb-3">
+        <a href="?path={{ parent_path }}{% if filter %}&filter={{ filter }}{% endif %}" class="btn btn-outline-secondary">Назад</a>
+    </div>
+    {% endif %}
+
     <!-- Форма фильтрации -->
     <form method="get" class="form-inline mb-3">
+        <input type="hidden" name="path" value="{{ current_path }}">
         <label for="filter" class="mr-2">Фильтр по типу:</label>
         <select name="filter" id="filter" class="form-control mr-2">
-            <option value="">Все</option>
-            <option value="images" {% if request.GET.filter == "images" %}selected{% endif %}>Изображения</option>
-            <option value="documents" {% if request.GET.filter == "documents" %}selected{% endif %}>Документы</option>
+            <option value="" {% if not filter %}selected{% endif %}>Все</option>
+            <option value="images" {% if filter == "images" %}selected{% endif %}>Изображения</option>
+            <option value="documents" {% if filter == "documents" %}selected{% endif %}>Документы</option>
         </select>
         <button type="submit" class="btn btn-secondary">Применить</button>
     </form>
 
+    <!-- Форма выбора ресурсов для скачивания -->
     <form method="post" action="{% url 'diskapp:download_files' %}">
         {% csrf_token %}
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Выбрать</th>
-                    <th>Имя файла</th>
+                    <th>Имя</th>
                     <th>Тип</th>
                 </tr>
             </thead>
@@ -35,10 +44,16 @@
                 {% for item in items %}
                 <tr>
                     <td>
-                        <!-- Передаём путь файла для скачивания -->
+                        <!-- Отображаем чекбокс для файлов и папок -->
                         <input type="checkbox" name="file_paths" value="{{ item.path }}">
                     </td>
-                    <td>{{ item.name }}</td>
+                    <td>
+                        {% if item.type == "dir" %}
+                        <a href="?path={{ item.path }}{% if filter %}&filter={{ filter }}{% endif %}">{{ item.name }}</a>
+                        {% else %}
+                        {{ item.name }}
+                        {% endif %}
+                    </td>
                     <td>{{ item.type }}</td>
                 </tr>
                 {% empty %}
@@ -48,7 +63,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        <button type="submit" class="btn btn-success">Скачать выбранные файлы</button>
+        <button type="submit" class="btn btn-success">Скачать выбранные ресурсы</button>
     </form>
 </div>
 </body>
